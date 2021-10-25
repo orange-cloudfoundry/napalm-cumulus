@@ -270,6 +270,28 @@ class CumulusDriver(NetworkDriver):
 
         return ntp_stats
 
+    def get_vlans(self):
+        """Cumulus get_vlans."""
+        vlan_details = {}
+        command = 'net show bridge vlan json'
+        try:
+            vlan_details = json.loads(self._send_command(command))
+        except ValueError:
+            vlan_details = json.loads(self.device.send_command(command))
+
+        final_vlans = {}
+
+        for interface, vlans in vlan_details.items():
+            for vlan in vlans:
+                if vlan['vlan'] not in final_vlans.keys():
+                    final_vlans[vlan['vlan']] = {
+                        'name': '',
+                        'interfaces': [interface]
+                    }
+                    continue
+                final_vlans[vlan['vlan']]['interfaces'].append(interface)
+        return final_vlans
+
     def ping(self,
              destination,
              source=C.PING_SOURCE,
