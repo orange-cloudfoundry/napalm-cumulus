@@ -51,6 +51,7 @@ class CumulusDriver(NetworkDriver):
         self.timeout = timeout
         self.loaded = False
         self.changed = False
+        self.has_sudo = False
 
         if optional_args is None:
             optional_args = {}
@@ -79,6 +80,7 @@ class CumulusDriver(NetworkDriver):
         self.port = optional_args.get('port', 22)
         self.sudo_pwd = optional_args.get('sudo_pwd', self.password)
         self.retrieve_details = optional_args.get('retrieve_details', False)
+        self.has_sudo = optional_args.get('has_sudo', False)
 
     def open(self):
         try:
@@ -90,10 +92,11 @@ class CumulusDriver(NetworkDriver):
             # Enter root mode.
             if self.netmiko_optional_args.get('secret'):
                 self.device.enable()
-            response = self.device.send_command_timing('sudo su')
-            if '[sudo]' in response:
-                self.device.send_command_timing(self.sudo_pwd)
-                self.device.base_prompt = "#"
+            if self.has_sudo:
+                response = self.device.send_command_timing('sudo su')
+                if '[sudo]' in response:
+                    self.device.send_command_timing(self.sudo_pwd)
+                    self.device.base_prompt = "#"
         except NetMikoTimeoutException:
             raise ConnectionException('Cannot connect to {}'.format(self.hostname))
         except ValueError:
