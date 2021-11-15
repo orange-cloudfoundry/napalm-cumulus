@@ -495,21 +495,19 @@ class CumulusDriver(NetworkDriver):
             interfaces[interface_name]['last_flapped'] = float(last_flapped)
         return interfaces
 
-    def get_interfaces_mode(self):
+    def get_interface_mode(self, interface_name):
         interfaces = {}
         # Get 'net show interface all json' output.
-        output = self._send_command('net show interface all json')
+        output = self._send_command('net show interface {} json'.format(interface_name))
         # Handling bad send_command_timing return output.
         try:
             output_json = json.loads(output)
         except ValueError:
-            output_json = json.loads(self.device.send_command('net show interface all json'))
-        for interface_name, interface_cu in output_json.items():
-            interfaces[interface_name] = interface_cu['mode']. \
-                lower(). \
-                rstrip('/l2'). \
-                rstrip('/l3')
-        return interfaces
+            output_json = json.loads(self.device.send_command('net show interface {} json'.format(interface_name)))
+        return output_json['mode']. \
+            lower(). \
+            rstrip('/l2'). \
+            rstrip('/l3')
 
     def get_interfaces_ip(self):
         # Get net show interface all json output.
