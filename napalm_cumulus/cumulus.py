@@ -505,7 +505,10 @@ class CumulusDriver(NetworkDriver):
         except ValueError:
             output_json = json.loads(self.device.send_command('net show interface all json'))
         for interface_name, interface_cu in output_json.items():
-            interfaces[interface_name] = interface_cu['mode'].lower().rstrip('/l2')
+            interfaces[interface_name] = interface_cu['mode']. \
+                lower(). \
+                rstrip('/l2'). \
+                rstrip('/l3')
         return interfaces
 
     def get_interfaces_ip(self):
