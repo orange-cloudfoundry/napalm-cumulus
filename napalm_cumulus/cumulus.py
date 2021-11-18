@@ -393,11 +393,15 @@ class CumulusDriver(NetworkDriver):
 
     def _get_interface_neighbors(self, interface):
         neighbors = []
-        for idx, chassie in enumerate(interface['chassis']):
+        for idx, chassis in enumerate(interface['chassis']):
+            hostname = ''
+            if 'name' in chassis.keys():
+                hostname = chassis['name'][0]['value']
             neighbors.append({
-                'hostname': chassie['name'][0]['value'],
+                'hostname': hostname,
                 'port': interface['port'][idx]['id'][0]['value'],
             })
+
         return neighbors
 
     def get_lldp_neighbors(self):

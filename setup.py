@@ -18,7 +18,7 @@ except AttributeError:
 
 setup(
     name="napalm-cumulus",
-    version="0.4.2",
+    version="0.4.3",
     packages=find_packages(),
     author="Arthur Halet",
     author_email="arthur.halet@orange.com",
