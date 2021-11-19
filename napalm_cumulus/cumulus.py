@@ -404,6 +404,23 @@ class CumulusDriver(NetworkDriver):
 
         return neighbors
 
+    def _get_interface_neighbors_detail(self, interface):
+        neighbors = []
+        for idx, chassis in enumerate(interface['chassis']):
+            hostname = ''
+            if 'name' in chassis.keys():
+                hostname = chassis['name'][0]['value']
+            neighbors.append({
+                'remote_chassis_id': chassis['id'][0]['value'],
+                'remote_system_name': hostname,
+                'remote_system_description': chassis['descr'][0]['value'],
+                'remote_port': interface['port'][idx]['id'][0]['value'],
+                'remote_port_description': interface['port'][idx]['descr'][0]['value'],
+                'remote_system_capab': [item['type'].lower() for item in chassis['capability']],
+                'remote_system_enable_capab': [item['type'].lower() for item in chassis['capability'] if item['enabled'] == True]
+            })
+        return neighbors
+
     def get_lldp_neighbors(self):
         """Cumulus get_lldp_neighbors."""
         lldp = {}
@@ -419,6 +436,21 @@ class CumulusDriver(NetworkDriver):
                 lldp[interface['name']] = self._get_interface_neighbors(interface)
         return lldp
 
+    def get_lldp_neighbors_detail(self):
+        """Cumulus getlldp_neighbors_detail."""
+        lldp = {}
+        command = 'net show lldp json'
+
+        try:
+            lldp_output = json.loads(self._send_command(command))
+        except ValueError:
+            lldp_output = json.loads(self.device.send_command(command))
+
+        for all_lldp in lldp_output['lldp']:
+            for interface in all_lldp['interface']:
+                lldp[interface['name']] = self._get_interface_neighbors_detail(interface)
+
+        return lldp
     def get_interfaces(self):
         interfaces = {}
         # Get 'net show interface all json' output.
