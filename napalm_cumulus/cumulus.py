@@ -404,6 +404,23 @@ class CumulusDriver(NetworkDriver):
 
         return neighbors
 
+    def _get_interface_neighbors_detail(self, interface):
+        neighbors = []
+        for idx, chassis in enumerate(interface['chassis']):
+            hostname = ''
+            if 'name' in chassis.keys():
+                hostname = chassis['name'][0]['value']
+            neighbors.append({
+                'remote_chassis_id': chassis['id'][0]['value'],
+                'remote_system_name': hostname,
+                'remote_system_description': chassis['descr'][0]['value'],
+                'remote_port': interface['port'][idx]['id'][0]['value'],
+                'remote_port_description': interface['port'][idx]['descr'][0]['value'],
+                'remote_system_capab': [item['type'].lower() for item in chassis['capability']],
+                'remote_system_enable_capab': [item['type'].lower() for item in chassis['capability'] if item['enabled'] == True]
+            })
+        return neighbors
+
     def get_lldp_neighbors(self):
         """Cumulus get_lldp_neighbors."""
         lldp = {}
@@ -417,6 +434,22 @@ class CumulusDriver(NetworkDriver):
         for all_lldp in lldp_output['lldp']:
             for interface in all_lldp['interface']:
                 lldp[interface['name']] = self._get_interface_neighbors(interface)
+        return lldp
+
+    def get_lldp_neighbors_detail(self):
+        """Cumulus getlldp_neighbors_detail."""
+        lldp = {}
+        command = 'net show lldp json'
+
+        try:
+            lldp_output = json.loads(self._send_command(command))
+        except ValueError:
+            lldp_output = json.loads(self.device.send_command(command))
+
+        for all_lldp in lldp_output['lldp']:
+            for interface in all_lldp['interface']:
+                lldp[interface['name']] = self._get_interface_neighbors_detail(interface)
+
         return lldp
 
     def get_interfaces(self):
@@ -538,3 +571,39 @@ class CumulusDriver(NetworkDriver):
                     interfaces_ip[interface][ip_ver][ip] = {'prefix_length': int(prefix)}
 
         return interfaces_ip
+
+    def get_environment(self):
+        fans = {}
+        temperature = {}
+        power = {}
+        output = self._send_command('net show system sensors json')
+        # Handling bad send_command_timing return output.
+        try:
+            output_json = json.loads(output)
+        except ValueError:
+            output_json = json.loads(self.device.send_command('net show system sensors json'))
+
+        for sensor in output_json:
+            if sensor['type'] == "temp":
+                temperature[sensor['name']] = {
+                    "temperature": sensor['input'],
+                    "is_alert": True if sensor['state'] != "OK" else False,
+                    "is_critical": True if sensor['state'] != "OK" else False
+                    }
+            if sensor['type'] == "fan":
+                fans[sensor['name']] = {
+                        "status": True if sensor['state'] == "OK" else False
+                        }
+            if sensor['type'] == "power":
+                power[sensor['name']] = {
+                        "status": True if sensor['state'] == "OK" else False
+                        }
+
+        return {
+                "fans": fans,
+                "temperature": temperature,
+                "power": power,
+                "cpu": {},
+                "memory":{}
+                }
+
