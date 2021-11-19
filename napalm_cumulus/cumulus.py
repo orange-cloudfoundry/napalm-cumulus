@@ -451,6 +451,7 @@ class CumulusDriver(NetworkDriver):
                 lldp[interface['name']] = self._get_interface_neighbors_detail(interface)
 
         return lldp
+
     def get_interfaces(self):
         interfaces = {}
         # Get 'net show interface all json' output.
@@ -570,3 +571,39 @@ class CumulusDriver(NetworkDriver):
                     interfaces_ip[interface][ip_ver][ip] = {'prefix_length': int(prefix)}
 
         return interfaces_ip
+
+    def get_environment(self):
+        fans = {}
+        temperature = {}
+        power = {}
+        output = self._send_command('net show system sensors json')
+        # Handling bad send_command_timing return output.
+        try:
+            output_json = json.loads(output)
+        except ValueError:
+            output_json = json.loads(self.device.send_command('net show system sensors json'))
+
+        for sensor in output_json:
+            if sensor['type'] == "temp":
+                temperature[sensor['name']] = {
+                    "temperature": sensor['input'],
+                    "is_alert": True if sensor['state'] != "OK" else False,
+                    "is_critical": True if sensor['state'] != "OK" else False
+                    }
+            if sensor['type'] == "fan":
+                fans[sensor['name']] = {
+                        "status": True if sensor['state'] == "OK" else False
+                        }
+            if sensor['type'] == "power":
+                power[sensor['name']] = {
+                        "status": True if sensor['state'] == "OK" else False
+                        }
+
+        return {
+                "fans": fans,
+                "temperature": temperature,
+                "power": power,
+                "cpu": {},
+                "memory":{}
+                }
+
