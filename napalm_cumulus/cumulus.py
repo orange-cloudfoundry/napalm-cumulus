@@ -273,6 +273,15 @@ class CumulusDriver(NetworkDriver):
 
         return ntp_stats
 
+    def _extract_all_vlans(self, vlan_spec):
+        if 'vlanEnd' not in vlan_spec.keys():
+            return [vlan_spec['vlan']]
+
+        vlans = []
+        for i in range(vlan_spec['vlan'], vlan_spec['vlanEnd'], 1):
+            vlans.append(i)
+        return vlans
+
     def get_vlans(self):
         """Cumulus get_vlans."""
         vlan_details = {}
@@ -281,18 +290,19 @@ class CumulusDriver(NetworkDriver):
             vlan_details = json.loads(self._send_command(command))
         except ValueError:
             vlan_details = json.loads(self.device.send_command(command))
-
         final_vlans = {}
 
-        for interface, vlans in vlan_details.items():
-            for vlan in vlans:
-                if vlan['vlan'] not in final_vlans.keys():
-                    final_vlans[vlan['vlan']] = {
-                        'name': '',
-                        'interfaces': [interface]
-                    }
-                    continue
-                final_vlans[vlan['vlan']]['interfaces'].append(interface)
+        for interface, vlans_spec in vlan_details.items():
+            for vlan_spec in vlans_spec:
+                all_vlans = self._extract_all_vlans(vlan_spec)
+                for vlan in all_vlans:
+                    if vlan not in final_vlans.keys():
+                        final_vlans[vlan] = {
+                            'name': '',
+                            'interfaces': [interface]
+                        }
+                        continue
+                    final_vlans[vlan]['interfaces'].append(interface)
         return final_vlans
 
     def ping(self,
@@ -417,7 +427,8 @@ class CumulusDriver(NetworkDriver):
                 'remote_port': interface['port'][idx]['id'][0]['value'],
                 'remote_port_description': interface['port'][idx]['descr'][0]['value'],
                 'remote_system_capab': [item['type'].lower() for item in chassis['capability']],
-                'remote_system_enable_capab': [item['type'].lower() for item in chassis['capability'] if item['enabled'] == True]
+                'remote_system_enable_capab': [item['type'].lower() for item in chassis['capability'] if
+                                               item['enabled'] == True]
             })
         return neighbors
 
@@ -589,21 +600,20 @@ class CumulusDriver(NetworkDriver):
                     "temperature": sensor['input'],
                     "is_alert": True if sensor['state'] != "OK" else False,
                     "is_critical": True if sensor['state'] != "OK" else False
-                    }
+                }
             if sensor['type'] == "fan":
                 fans[sensor['name']] = {
-                        "status": True if sensor['state'] == "OK" else False
-                        }
+                    "status": True if sensor['state'] == "OK" else False
+                }
             if sensor['type'] == "power":
                 power[sensor['name']] = {
-                        "status": True if sensor['state'] == "OK" else False
-                        }
-
-        return {
-                "fans": fans,
-                "temperature": temperature,
-                "power": power,
-                "cpu": {},
-                "memory":{}
+                    "status": True if sensor['state'] == "OK" else False
                 }
 
+        return {
+            "fans": fans,
+            "temperature": temperature,
+            "power": power,
+            "cpu": {},
+            "memory": {}
+        }
