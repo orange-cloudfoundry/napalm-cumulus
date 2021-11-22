@@ -416,20 +416,44 @@ class CumulusDriver(NetworkDriver):
 
     def _get_interface_neighbors_detail(self, interface):
         neighbors = []
+        command = 'net show interface {} json'.format(interface['name'])
+        if_output = {}
+        try:
+            if_output = json.loads(self._send_command(command))
+        except ValueError:
+            if_output = json.loads(self.device.send_command(command))
+        parent_interface = ''
+        print(if_output['summary'])
+        find_parent = re.search('Master: ([A-Za-z0-9_-]+)\(\w+\)', if_output['summary'], re.M)
+        if find_parent:
+            parent_interface = find_parent.group(1)
+
         for idx, chassis in enumerate(interface['chassis']):
             hostname = ''
             if 'name' in chassis.keys():
                 hostname = chassis['name'][0]['value']
-            neighbors.append({
+            port = interface['port'][idx]
+            elem = {
+                'parent_interface': parent_interface,
                 'remote_chassis_id': chassis['id'][0]['value'],
                 'remote_system_name': hostname,
-                'remote_system_description': chassis['descr'][0]['value'],
-                'remote_port': interface['port'][idx]['id'][0]['value'],
-                'remote_port_description': interface['port'][idx]['descr'][0]['value'],
-                'remote_system_capab': [item['type'].lower() for item in chassis['capability']],
-                'remote_system_enable_capab': [item['type'].lower() for item in chassis['capability'] if
-                                               item['enabled'] == True]
-            })
+                'remote_port': port['id'][0]['value'],
+                'remote_system_capab': [],
+                'remote_system_enable_capab': [],
+                'remote_system_description': '',
+                'remote_port_description': '',
+            }
+            if 'capability' in chassis.keys():
+                elem['remote_system_capab'] = [item['type'].lower() for item in chassis['capability']]
+                elem['remote_system_enable_capab'] = [item['type'].lower() for item in chassis['capability'] if
+                                                      item['enabled'] == True]
+
+            if 'descr' in chassis.keys():
+                elem['remote_system_description'] = chassis['descr'][0]['value']
+            if 'descr' in port.keys():
+                elem['remote_port_description'] = port['descr'][0]['value']
+
+            neighbors.append(elem)
         return neighbors
 
     def get_lldp_neighbors(self):
@@ -447,11 +471,14 @@ class CumulusDriver(NetworkDriver):
                 lldp[interface['name']] = self._get_interface_neighbors(interface)
         return lldp
 
-    def get_lldp_neighbors_detail(self):
-        """Cumulus getlldp_neighbors_detail."""
+    def get_lldp_neighbors_detail(self, interface=""):
+        """Cumulus getlldp_neighbors_detail.
+        :param interface:
+        """
         lldp = {}
         command = 'net show lldp json'
-
+        if interface:
+            command = 'net show lldp {} json'.format(interface)
         try:
             lldp_output = json.loads(self._send_command(command))
         except ValueError:
