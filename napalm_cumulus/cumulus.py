@@ -467,7 +467,7 @@ class CumulusDriver(NetworkDriver):
             lldp_output = json.loads(self.device.send_command(command))
 
         for all_lldp in lldp_output['lldp']:
-            if 'interface' not in all_lldp:
+            if 'interface' not in all_lldp.keys():
                 return {}
             for interface in all_lldp['interface']:
                 lldp[interface['name']] = self._get_interface_neighbors(interface)
