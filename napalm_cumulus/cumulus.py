@@ -468,7 +468,7 @@ class CumulusDriver(NetworkDriver):
 
         for all_lldp in lldp_output['lldp']:
             if 'interface' not in all_lldp.keys():
-                return {}
+                continue
             for interface in all_lldp['interface']:
                 lldp[interface['name']] = self._get_interface_neighbors(interface)
         return lldp
@@ -488,7 +488,7 @@ class CumulusDriver(NetworkDriver):
 
         for all_lldp in lldp_output['lldp']:
             if 'interface' not in all_lldp.keys():
-                return {}
+                continue
             for interface in all_lldp['interface']:
                 lldp[interface['name']] = self._get_interface_neighbors_detail(interface)
 
