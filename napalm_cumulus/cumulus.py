@@ -35,7 +35,10 @@ from napalm.base.exceptions import (
 )
 from napalm.base.utils import string_parsers
 from netmiko import ConnectHandler
-from netmiko.ssh_exception import NetMikoTimeoutException
+try:
+    from netmiko.ssh_exception import NetMikoTimeoutException
+except ModuleNotFoundError:
+    from netmiko.exceptions import NetMikoTimeoutException
 from pytz import timezone
 
 
