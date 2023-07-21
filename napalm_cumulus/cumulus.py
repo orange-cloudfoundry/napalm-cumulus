@@ -93,7 +93,7 @@ class CumulusDriver(NetworkDriver):
                                          password=self.password,
                                          **self.netmiko_optional_args)
             # Enter root mode.
-            if self.netmiko_optional_args.get('secret'):
+            if self.has_sudo and self.netmiko_optional_args.get('secret'):
                 self.device.enable()
             if self.has_sudo:
                 response = self.device.send_command_timing('sudo su')
