@@ -55,6 +55,7 @@ class CumulusDriver(NetworkDriver):
         self.loaded = False
         self.changed = False
         self.has_sudo = False
+        self.use_nvue = False
 
         if optional_args is None:
             optional_args = {}
@@ -104,6 +105,9 @@ class CumulusDriver(NetworkDriver):
             raise ConnectionException('Cannot connect to {}'.format(self.hostname))
         except ValueError:
             raise ConnectionException('Cannot become root.')
+        build_output = self._send_command("nv show system")
+        if "Cumulus Linux 5" in build_output:
+            self.use_nvue = True
 
     def close(self):
         self.device.disconnect()
@@ -138,24 +142,38 @@ class CumulusDriver(NetworkDriver):
 
     def discard_config(self):
         if self.loaded:
-            self._send_command('net abort')
+            if self.use_nvue:
+                self._send_command('nv detach')
+            else:
+                self._send_command('net abort')
             self.loaded = False
 
     def compare_config(self):
-        if self.loaded:
+        if self.loaded and self.use_nvue:
+            return self._send_command('nv config diff --color off')
+        elif self.loaded:
             diff = self._send_command('net pending')
             return re.sub(r'\x1b\[\d+m', '', diff)
         return ''
 
     def commit_config(self, message=""):
         if self.loaded:
-            self._send_command('net commit')
+            if self.use_nvue:
+                self._send_command('nv config apply')
+            else:
+                self._send_command('net commit')
             self.changed = True
             self.loaded = False
 
     def rollback(self):
         if self.changed:
-            self._send_command('net rollback last')
+            if self.use_nvue:
+                history_output = self._send_command('nv config history |grep rev_id:')
+                rev_history = history_output.splitlines()
+                previous_rev = rev_history[1].split()[1].strip("'")
+                self._send_command(f'nv apply { previous_rev }')
+            else:
+                self._send_command('net rollback last')
             self.changed = False
 
     def _send_command(self, command):
