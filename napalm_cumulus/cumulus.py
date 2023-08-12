@@ -143,7 +143,7 @@ class CumulusDriver(NetworkDriver):
     def discard_config(self):
         if self.loaded:
             if self.use_nvue:
-                self._send_command('nv detach')
+                self._send_command('nv config detach')
             else:
                 self._send_command('net abort')
             self.loaded = False
@@ -152,8 +152,11 @@ class CumulusDriver(NetworkDriver):
         if self.loaded and self.use_nvue:
             return self._send_command('nv config diff --color off')
         elif self.loaded:
-            diff = self._send_command('net pending')
-            return re.sub(r'\x1b\[\d+m', '', diff)
+            full_diff = self._send_command('net pending')
+            # ignore commands that matched the existing config
+            trimmed_diff = full_diff.split("net add/del commands")[0].strip()
+            if trimmed_diff != '':
+                return re.sub(r'\x1b\[\d+m', '', full_diff)
         return ''
 
     def commit_config(self, message=""):
@@ -171,7 +174,7 @@ class CumulusDriver(NetworkDriver):
                 history_output = self._send_command('nv config history |grep rev_id:')
                 rev_history = history_output.splitlines()
                 previous_rev = rev_history[1].split()[1].strip("'")
-                self._send_command(f'nv apply { previous_rev }')
+                self._send_command(f'nv config apply { previous_rev }')
             else:
                 self._send_command('net rollback last')
             self.changed = False
