@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "napalm-cumulus"
+version = "0.6.2"
+description = "Network Automation and Programmability Abstraction Layer with Multivendor support"
+authors = ["Justin Brink <justin.brink@networktocode.com>"]
+readme = "README.md"
+packages = [{include = "napalm_cumulus"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+setuptools = ">38.4.0"
+napalm = ">=2.0.0"
+netmiko = "2.2.2"
+pytz = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+future = "*"
+coveralls = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-json = "*"
+pytest-pythonpath = "*"
+pylama = "*"
+flake8-import-order = "*"
