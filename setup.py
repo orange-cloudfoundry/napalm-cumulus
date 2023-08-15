@@ -18,10 +18,10 @@ except AttributeError:
 
 setup(
     name="napalm-cumulus",
-    version="0.5.6",
+    version="0.6.2",
     packages=find_packages(),
-    author="Arthur Halet",
-    author_email="arthur.halet@orange.com",
+    author="Justin Brink",
+    author_email="justin.brink@networktocode.com",
     description="Network Automation and Programmability Abstraction Layer with Multivendor support",
     classifiers=[
         'Topic :: Utilities',
@@ -30,7 +30,7 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS',
     ],
-    url="https://github.com/napalm-automation/napalm-cumulus",
+    url="https://github.com/justinbrink/napalm-cumulus",
     include_package_data=True,
     install_requires=reqs,
 )
