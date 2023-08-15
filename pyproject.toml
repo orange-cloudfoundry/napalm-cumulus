@@ -10,7 +10,7 @@ packages = [{include = "napalm_cumulus"}]
 python = "^3.7"
 setuptools = ">38.4.0"
 napalm = ">=2.0.0"
-netmiko = "2.2.2"
+netmiko = ">=2.2.2"
 pytz = "*"
 
 [build-system]
