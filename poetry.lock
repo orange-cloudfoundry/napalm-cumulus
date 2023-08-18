@@ -251,18 +251,6 @@ test = ["pretend", "pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
-name = "enum34"
-version = "1.1.10"
-description = "Python 3.4 Enum backported to 3.3, 3.2, 3.1, 2.7, 2.6, 2.5, and 2.4"
-optional = false
-python-versions = "*"
-files = [
-    {file = "enum34-1.1.10-py2-none-any.whl", hash = "sha256:a98a201d6de3f2ab3db284e70a33b0f896fbf35f8086594e8c9e74b909058d53"},
-    {file = "enum34-1.1.10-py3-none-any.whl", hash = "sha256:c3858660960c984d6ab0ebad691265180da2b43f07e061c0f8dca9ef3cffd328"},
-    {file = "enum34-1.1.10.tar.gz", hash = "sha256:cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248"},
-]
-
-[[package]]
 name = "future"
 version = "0.18.3"
 description = "Clean single-source support for Python 3 and 2"
@@ -281,17 +269,6 @@ python-versions = ">=3.5"
 files = [
     {file = "idna-3.4-py3-none-any.whl", hash = "sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2"},
     {file = "idna-3.4.tar.gz", hash = "sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4"},
-]
-
-[[package]]
-name = "ipaddress"
-version = "1.0.23"
-description = "IPv4/IPv6 manipulation library"
-optional = false
-python-versions = "*"
-files = [
-    {file = "ipaddress-1.0.23-py2.py3-none-any.whl", hash = "sha256:6e0f4a39e66cb5bb9a137b00276a2eff74f93b71dcbdad6f10ff7df9d3557fcc"},
-    {file = "ipaddress-1.0.23.tar.gz", hash = "sha256:b7f8e0369580bb4a24d5ba1d7cc29660a4a6987763faf1d8a8046830e020e7e2"},
 ]
 
 [[package]]
@@ -504,28 +481,35 @@ files = [
 
 [[package]]
 name = "napalm"
-version = "2.3.3"
+version = "4.1.0"
 description = "Network Automation and Programmability Abstraction Layer with Multivendor support"
 optional = false
 python-versions = "*"
 files = [
-    {file = "napalm-2.3.3.tar.gz", hash = "sha256:4c913b6c3d62f65b9deadb0d0be69260bc6ea5c71a7ec6cb27adda63d6056175"},
+    {file = "napalm-4.1.0-py2.py3-none-any.whl", hash = "sha256:14a5b7759a0247a26fff2c444b1cfc150a08224de8addf4076c384845285bf5b"},
+    {file = "napalm-4.1.0.tar.gz", hash = "sha256:3b3e18efd556861c056ba509eb46f5ffc9e3e6c42db399fa76b6ea9af272c17a"},
 ]
 
 [package.dependencies]
 cffi = ">=1.11.3"
 future = "*"
 jinja2 = "*"
-junos-eznc = ">=2.1.5"
+junos-eznc = ">=2.6.3"
+lxml = ">=4.3.0"
+ncclient = "*"
 netaddr = "*"
-netmiko = ">=2.1.1"
-pyeapi = "*"
-pyIOSXR = ">=0.53"
-pynxos = "0.0.3"
+netmiko = ">=4.1.0"
+netutils = ">=1.0.0"
+paramiko = ">=2.6.0"
+pyeapi = ">=0.8.2"
 pyYAML = "*"
+requests = ">=2.7.0"
 scp = "*"
 setuptools = ">=38.4.0"
 textfsm = "*"
+ttp = "*"
+ttp-templates = "*"
+typing-extensions = ">=4.3.0"
 
 [[package]]
 name = "ncclient"
@@ -556,25 +540,50 @@ files = [
 
 [[package]]
 name = "netmiko"
-version = "2.2.2"
-description = "Multi-vendor library to simplify Paramiko SSH connections to network devices"
+version = "4.2.0"
+description = "Multi-vendor library to simplify legacy CLI connections to network devices"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7,<4.0"
 files = [
-    {file = "netmiko-2.2.2.tar.gz", hash = "sha256:7066d63e47c5a9928d7a011a76502df45ebce7eeaed4951cc5263459d50116d4"},
+    {file = "netmiko-4.2.0-py3-none-any.whl", hash = "sha256:8dae36263edc0b5ca5373d3d9ec428f38efd050ecfddac9c0698d0e65082bb3b"},
+    {file = "netmiko-4.2.0.tar.gz", hash = "sha256:7adde6fe3ea63336228f49a863650c2d83fb0e680e0f0d158b5b0fb04c4100e1"},
 ]
 
 [package.dependencies]
-enum34 = "*"
-ipaddress = "*"
-paramiko = ">=2.0.0"
-pyserial = "*"
-pyyaml = "*"
-scp = ">=0.10.0"
-textfsm = "*"
+ntc-templates = ">=2.0.0"
+paramiko = ">=2.9.5"
+pyserial = ">=3.3"
+pyyaml = ">=5.3"
+scp = ">=0.13.6"
+textfsm = ">=1.1.3"
+
+[[package]]
+name = "netutils"
+version = "1.4.1"
+description = "Common helper functions useful in network automation."
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "netutils-1.4.1-py3-none-any.whl", hash = "sha256:41002e42b205149fbe6739b7fdbc778ed843e87fabba9691d3d06a35f7876fd4"},
+    {file = "netutils-1.4.1.tar.gz", hash = "sha256:4f7501478d810bcd3c64edfe064fa8962a1572636f4fceee2538fc9d3616fbe2"},
+]
 
 [package.extras]
-test = ["pytest (>=3.2.5)"]
+optionals = ["napalm (>=4.0.0,<5.0.0)"]
+
+[[package]]
+name = "ntc-templates"
+version = "3.5.0"
+description = "TextFSM Templates for Network Devices, and Python wrapper for TextFSM's CliTable."
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "ntc_templates-3.5.0-py3-none-any.whl", hash = "sha256:86d75c077eb1ceb97f4f8c69c9e3c7a32b08210ceb8228e5fa4e87e080746fd4"},
+    {file = "ntc_templates-3.5.0.tar.gz", hash = "sha256:ee0dab4440dab1b3286549f8c08695b30037c1f36f55763c5a39005525f722c7"},
+]
+
+[package.dependencies]
+textfsm = ">=1.1.0,<2.0.0"
 
 [[package]]
 name = "paramiko"
@@ -626,20 +635,6 @@ dev = ["check-manifest", "pep8", "pyflakes", "twine"]
 test = ["coverage", "mock"]
 
 [[package]]
-name = "pyiosxr"
-version = "0.53"
-description = "Python API to interact with network devices running IOS-XR"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pyIOSXR-0.53.tar.gz", hash = "sha256:0e25d6871b48db81511c03261924ef23169c66e80321801b9bb221a3b74e370e"},
-]
-
-[package.dependencies]
-lxml = ">=3.2.4"
-netmiko = ">=1.4.3"
-
-[[package]]
 name = "pynacl"
 version = "1.5.0"
 description = "Python binding to the Networking and Cryptography (NaCl) library"
@@ -664,20 +659,6 @@ cffi = ">=1.4.1"
 [package.extras]
 docs = ["sphinx (>=1.6.5)", "sphinx-rtd-theme"]
 tests = ["hypothesis (>=3.27.0)", "pytest (>=3.2.1,!=3.3.0)"]
-
-[[package]]
-name = "pynxos"
-version = "0.0.3"
-description = "A library for managing Cisco NX-OS devices through NX-API."
-optional = false
-python-versions = "*"
-files = [
-    {file = "pynxos-0.0.3.tar.gz", hash = "sha256:2cb462ec8f7f59cd2e12476ddf10e397e26caf78bb3061d1d5d9f7c8d27a649b"},
-]
-
-[package.dependencies]
-future = "*"
-requests = ">=2.7.0"
 
 [[package]]
 name = "pyparsing"
@@ -863,6 +844,49 @@ diagrams = ["pygraphviz"]
 test = ["pytest"]
 
 [[package]]
+name = "ttp"
+version = "0.9.5"
+description = "Template Text Parser"
+optional = false
+python-versions = ">=2.7,<4.0"
+files = [
+    {file = "ttp-0.9.5-py2.py3-none-any.whl", hash = "sha256:2c9fcf560b3f696e9fdd3554dc8e4622cbb10cac1d4fca13a7cf608c4a7fd137"},
+    {file = "ttp-0.9.5.tar.gz", hash = "sha256:234414f4d3039d2d1cde09993f89f8db1b34d447f76c6a402555cefac2e59c4e"},
+]
+
+[package.extras]
+docs = ["Sphinx (==4.3.0)", "readthedocs-sphinx-search (==0.1.1)", "sphinx_rtd_theme (==1.0.0)", "sphinxcontrib-applehelp (==1.0.1)", "sphinxcontrib-devhelp (==1.0.1)", "sphinxcontrib-htmlhelp (==2.0.0)", "sphinxcontrib-jsmath (==1.0.1)", "sphinxcontrib-napoleon (==0.7)", "sphinxcontrib-qthelp (==1.0.2)", "sphinxcontrib-serializinghtml (==1.1.5)", "sphinxcontrib-spelling (==7.2.1)"]
+full = ["cerberus (>=1.3.0,<1.4.0)", "deepdiff (>=5.8.0,<5.9.0)", "jinja2 (>=3.0.0,<3.1.0)", "n2g (>=0.2.0,<0.3.0)", "openpyxl (>=3.0.0,<3.1.0)", "pyyaml (==6.0)", "tabulate (>=0.8.0,<0.9.0)", "ttp_templates (<1.0.0)", "yangson (>=1.4.0,<1.5.0)"]
+
+[[package]]
+name = "ttp-templates"
+version = "0.3.5"
+description = "Template Text Parser Templates collections"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "ttp_templates-0.3.5-py3-none-any.whl", hash = "sha256:4985a68640468127a0e31021672039cd88a8b9c3dd9289cad67839209cddaf30"},
+    {file = "ttp_templates-0.3.5.tar.gz", hash = "sha256:e59870d4f65bd4aaf89178dc9065a7db8b80a23d5d79b5d6ffd041312d5ec5a6"},
+]
+
+[package.dependencies]
+ttp = ">=0.6.0"
+
+[package.extras]
+docs = ["mkdocs (==1.2.4)", "mkdocs-material (==7.2.2)", "mkdocs-material-extensions (==1.0.1)", "mkdocstrings[python] (>=0.18.0,<0.19.0)", "pygments (==2.11)", "pymdown-extensions (==9.3)"]
+
+[[package]]
+name = "typing-extensions"
+version = "4.7.1"
+description = "Backported and Experimental Type Hints for Python 3.7+"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
+    {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
+]
+
+[[package]]
 name = "urllib3"
 version = "2.0.4"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -895,4 +919,4 @@ pyyaml = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "1825f685875a444fd7c0312cfe3b70e3f3d147c2f648d7b42470901810afabb7"
+content-hash = "7eb87d0457f8e787732e2c554de41d9084ffa3221f67e1c7297a2f843ffa2c86"
