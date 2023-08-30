@@ -52,6 +52,7 @@ class CumulusDriver(NetworkDriver):
         self.username = username
         self.password = password
         self.timeout = timeout
+        self.force = False
         self.loaded = False
         self.changed = False
         self.has_sudo = False
@@ -85,6 +86,7 @@ class CumulusDriver(NetworkDriver):
         self.sudo_pwd = optional_args.get('sudo_pwd', self.password)
         self.retrieve_details = optional_args.get('retrieve_details', False)
         self.has_sudo = optional_args.get('has_sudo', False)
+        self.force = optional_args.get('force', False)
 
     def open(self):
         try:
@@ -160,13 +162,22 @@ class CumulusDriver(NetworkDriver):
         return ''
 
     def commit_config(self, message=""):
-        if self.loaded:
-            if self.use_nvue:
-                self._send_command('nv config apply')
-            else:
-                self._send_command('net commit')
-            self.changed = True
-            self.loaded = False
+        if not self.loaded:
+            return
+        if self.use_nvue:
+            response = self._send_command('nv config apply')
+            if "[y/N]" in response:
+                if self.force:
+                    self._send_command('y')
+                else:
+                    self._send_command('n')
+                    self.discard_config()
+                    err_msg = response.split("Warning:")[1].split("Are you")[0].strip()
+                    raise MergeConfigException(f"Config cannot be applied. { err_msg }")
+        else:
+            self._send_command('net commit')
+        self.changed = True
+        self.loaded = False
 
     def rollback(self):
         if self.changed:
