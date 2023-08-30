@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "napalm-cumulus"
-version = "0.6.2"
+version = "0.6.3"
 description = "Network Automation and Programmability Abstraction Layer with Multivendor support"
 authors = ["Justin Brink <justin.brink@networktocode.com>"]
 readme = "README.md"
