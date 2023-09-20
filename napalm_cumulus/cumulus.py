@@ -35,7 +35,10 @@ from napalm.base.exceptions import (
 )
 from napalm.base.utils import string_parsers
 from netmiko import ConnectHandler
-from netmiko.ssh_exception import NetMikoTimeoutException
+try:
+    from netmiko.ssh_exception import NetMikoTimeoutException
+except ModuleNotFoundError:
+    from netmiko.exceptions import NetMikoTimeoutException
 from pytz import timezone
 
 
@@ -49,9 +52,11 @@ class CumulusDriver(NetworkDriver):
         self.username = username
         self.password = password
         self.timeout = timeout
+        self.force = False
         self.loaded = False
         self.changed = False
         self.has_sudo = False
+        self.use_nvue = False
 
         if optional_args is None:
             optional_args = {}
@@ -81,6 +86,7 @@ class CumulusDriver(NetworkDriver):
         self.sudo_pwd = optional_args.get('sudo_pwd', self.password)
         self.retrieve_details = optional_args.get('retrieve_details', False)
         self.has_sudo = optional_args.get('has_sudo', False)
+        self.force = optional_args.get('force', False)
 
     def open(self):
         try:
@@ -90,7 +96,7 @@ class CumulusDriver(NetworkDriver):
                                          password=self.password,
                                          **self.netmiko_optional_args)
             # Enter root mode.
-            if self.netmiko_optional_args.get('secret'):
+            if self.has_sudo and self.netmiko_optional_args.get('secret'):
                 self.device.enable()
             if self.has_sudo:
                 response = self.device.send_command_timing('sudo su')
@@ -101,6 +107,9 @@ class CumulusDriver(NetworkDriver):
             raise ConnectionException('Cannot connect to {}'.format(self.hostname))
         except ValueError:
             raise ConnectionException('Cannot become root.')
+        build_output = self._send_command("nv show system")
+        if "Cumulus Linux 5" in build_output:
+            self.use_nvue = True
 
     def close(self):
         self.device.disconnect()
@@ -135,24 +144,50 @@ class CumulusDriver(NetworkDriver):
 
     def discard_config(self):
         if self.loaded:
-            self._send_command('net abort')
+            if self.use_nvue:
+                self._send_command('nv config detach')
+            else:
+                self._send_command('net abort')
             self.loaded = False
 
     def compare_config(self):
-        if self.loaded:
-            diff = self._send_command('net pending')
-            return re.sub(r'\x1b\[\d+m', '', diff)
+        if self.loaded and self.use_nvue:
+            return self._send_command('nv config diff --color off')
+        elif self.loaded:
+            full_diff = self._send_command('net pending')
+            # ignore commands that matched the existing config
+            trimmed_diff = full_diff.split("net add/del commands")[0].strip()
+            if trimmed_diff != '':
+                return re.sub(r'\x1b\[\d+m', '', full_diff)
         return ''
 
     def commit_config(self, message=""):
-        if self.loaded:
+        if not self.loaded:
+            return
+        if self.use_nvue:
+            response = self._send_command('nv config apply')
+            if "[y/N]" in response:
+                if self.force:
+                    self._send_command('y')
+                else:
+                    self._send_command('n')
+                    self.discard_config()
+                    err_msg = response.split("Warning:")[1].split("Are you")[0].strip()
+                    raise MergeConfigException(f"Config cannot be applied. { err_msg }")
+        else:
             self._send_command('net commit')
-            self.changed = True
-            self.loaded = False
+        self.changed = True
+        self.loaded = False
 
     def rollback(self):
         if self.changed:
-            self._send_command('net rollback last')
+            if self.use_nvue:
+                history_output = self._send_command('nv config history |grep rev_id:')
+                rev_history = history_output.splitlines()
+                previous_rev = rev_history[1].split()[1].strip("'")
+                self._send_command(f'nv config apply { previous_rev }')
+            else:
+                self._send_command('net rollback last')
             self.changed = False
 
     def _send_command(self, command):
